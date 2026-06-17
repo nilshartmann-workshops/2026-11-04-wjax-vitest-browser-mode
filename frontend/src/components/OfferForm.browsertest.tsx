@@ -1,25 +1,35 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { afterEach, expect, test, vi } from "vitest";
+import { delay, http, HttpResponse } from "msw";
+import { setupWorker } from "msw/browser";
+import { afterAll, afterEach, beforeAll, expect, test } from "vitest";
 import { userEvent } from "vitest/browser";
 import { render } from "vitest-browser-react";
 
 import { OfferForm } from "./OfferForm.tsx";
 
-afterEach(() => vi.restoreAllMocks());
-
-test("sendet das Formular ab und leert das Formular", async () => {
-  // 🕵️‍♂️ Erzählen: die Antwort ist von Hand gebaut und ohne Typ, der Test
-  //    kennt die URL samt Query, und im Network-Tab steht kein Request
-  const fetchSpy = vi.spyOn(globalThis, "fetch").mockResolvedValue(
-    Response.json({
+// REIHENFOLGE:
+//  1. Echte App zeigen -> Netzwerkrequest
+//  BACKEND STOPPEN!!!!
+//  2. spyOn entfernen, Test ausführen -> Netzwerk geht nicht
+//  3. MSW ergänzen -> Netzwerk-Request zeigen
+const worker = setupWorker(
+  http.post("http://localhost:7400/api/posts/:postId/offers", async () => {
+    await delay(); // macht den Pending-Zustand beobachtbar
+    return HttpResponse.json({
       id: "o-1",
       postId: "p-1",
       author: "cat_lover_99",
       text: "Ich übernehme das gerne!",
       createdAt: "2026-06-17T10:00:00.000Z",
-    }),
-  );
+    });
+  }),
+);
 
+beforeAll(() => worker.start());
+afterEach(() => worker.resetHandlers());
+afterAll(() => worker.stop());
+
+test("sendet das Formular ab und leert das Formular", async () => {
   const screen = await render(
     <QueryClientProvider client={new QueryClient()}>
       <OfferForm postId="p-1" />
@@ -39,10 +49,6 @@ test("sendet das Formular ab und leert das Formular", async () => {
   await expect
     .element(screen.getByLabelText("Dein Benutzername"))
     .toHaveValue("");
-  expect(fetchSpy).toHaveBeenCalledWith(
-    "http://localhost:7400/api/posts/p-1/offers?slow=2400",
-    expect.objectContaining({ method: "POST" }),
-  );
 });
 
 test("zeigt Validierungsfehler und räumt sie beim Ausfüllen wieder ab", async () => {
