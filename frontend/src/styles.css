@@ -29,7 +29,10 @@
 
 /* === Category colors === */
 .category-reptil {
+  /* 💡 Bühne: Header-Ton "verbessern", der Screenshot-Test bricht, obwohl
+     ein jsdom-Snapshot grün bliebe (jsdom sieht kein CSS) */
   --category-bg: #d8f0e0;
+  /* --category-bg: #e8835a; */
   --category-text: #2a6645;
 }
 .category-katze {
