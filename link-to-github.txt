@@ -1,0 +1,1 @@
+https://github.com/nilshartmann-workshops/vitest-browser-mode-dwx-2026/actions

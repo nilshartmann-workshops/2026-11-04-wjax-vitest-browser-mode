@@ -1,0 +1,69 @@
+name: Tests
+
+on:
+  push:
+    branches: [main, schritte]
+  workflow_dispatch:
+
+jobs:
+  browser-tests:
+    name: Vitest (unit + browser)
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      checks: write
+    # Gleiches Image wie bei der lokalen Baseline-Erzeugung: garantiert
+    # pixelgleiche Screenshots (kein Font-Drift zwischen macOS und CI).
+    container:
+      image: mcr.microsoft.com/playwright:v1.60.0-jammy
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: pnpm aktivieren
+        run: |
+          corepack enable
+          corepack prepare pnpm@11.5.3 --activate
+
+      - name: Dependencies installieren
+        run: pnpm install --frozen-lockfile
+
+      - name: Tests ausführen
+        # vitest direkt (nicht `pnpm test`), damit --outputFile.junit greift.
+        # verbose → jeder Test einzeln im Log; junit → XML für den Report-Check.
+        run: >
+          pnpm exec vitest run
+          --reporter=verbose
+          --reporter=github-actions
+          --reporter=junit
+          --outputFile.junit=test-results.xml
+        env:
+          HEADLESS: "true"
+
+      # Im Container läuft der Job als root, der Checkout gehört einem
+      # anderen User → git meldet „dubious ownership" (exit 128). Das
+      # Workspace-Verzeichnis als sicher markieren, sonst scheitert der
+      # Report-Step.
+      - name: Git safe.directory setzen
+        if: always()
+        run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
+
+      - name: Test-Report veröffentlichen (einzelne Tests als Check)
+        if: always()
+        uses: dorny/test-reporter@v3
+        with:
+          name: Vitest-Ergebnisse
+          path: frontend/test-results.xml
+          reporter: java-junit
+
+      - name: Artefakte sichern (Traces + Screenshots)
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: vitest-artifacts
+          path: |
+            frontend/src/**/__traces__/**
+            frontend/.vitest/**
+          if-no-files-found: ignore
