@@ -94,3 +94,22 @@ test("zeigt Validierungsfehler und räumt sie beim Ausfüllen wieder ab", async 
     .element(screen.getByText("Benutzername darf nicht leer sein."))
     .not.toBeInTheDocument();
 });
+
+test("hat eine zugängliche Formular-Struktur", async () => {
+  const screen = await render(
+    <QueryClientProvider client={new QueryClient()}>
+      <OfferForm postId="p-1" />
+    </QueryClientProvider>,
+  );
+
+  await expect.element(screen.container).toMatchAriaInlineSnapshot(`
+    - heading "Dein Hilfsangebot" [level=3]
+    - text: Dein Benutzername
+    - textbox "Dein Benutzername":
+      - /placeholder: Dein Name
+    - text: Dein Hilfsangebot
+    - textbox "Dein Hilfsangebot":
+      - /placeholder: Erzähl kurz, warum du die richtige Person bist…
+    - button "Hilfsangebot abschicken"
+  `);
+});
