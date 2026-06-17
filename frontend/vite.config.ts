@@ -33,6 +33,8 @@ const config = defineConfig({
   plugins: [tailwindcss(), tanstackRouter(), viteReact()],
   test: {
     passWithNoTests: true,
+    // 🔎 Zeigen: pnpm test:coverage
+    // Report: frontend/coverage/index.html
     coverage: {
       provider: "v8",
       include: ["src/**"],
