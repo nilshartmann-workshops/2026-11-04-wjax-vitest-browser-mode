@@ -1,0 +1,234 @@
+{
+  "openapi": "3.1.0",
+  "info": { "title": "hütly API", "version": "1" },
+  "servers": [{ "url": "http://localhost:7400" }],
+  "paths": {
+    "/api/posts": {
+      "get": {
+        "operationId": "listPosts",
+        "parameters": [
+          {
+            "name": "orderBy",
+            "in": "query",
+            "schema": { "type": "string", "enum": ["date", "interested"] }
+          },
+          {
+            "name": "category",
+            "in": "query",
+            "schema": { "$ref": "#/components/schemas/Category" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Gesuche",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": { "$ref": "#/components/schemas/Post" }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "operationId": "createPost",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/CreatePostRequest" }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Neues Gesuch",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Post" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/posts/{postId}": {
+      "get": {
+        "operationId": "getPost",
+        "parameters": [
+          {
+            "name": "postId",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Gesuch",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Post" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/posts/{postId}/interested": {
+      "put": {
+        "operationId": "markInterested",
+        "parameters": [
+          {
+            "name": "postId",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Gesuch mit erhöhtem Zähler",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Post" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/posts/{postId}/offers": {
+      "get": {
+        "operationId": "listOffers",
+        "parameters": [
+          {
+            "name": "postId",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Hilfsangebote",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": { "$ref": "#/components/schemas/Offer" }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "operationId": "createOffer",
+        "parameters": [
+          {
+            "name": "postId",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/CreateOfferRequest" }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Neues Hilfsangebot",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Offer" }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "Category": {
+        "type": "string",
+        "enum": ["katze", "hund", "reptil", "pflanze", "sonstiges"]
+      },
+      "Post": {
+        "type": "object",
+        "required": [
+          "id",
+          "title",
+          "author",
+          "description",
+          "animal",
+          "timeframe",
+          "location",
+          "category",
+          "interested",
+          "createdAt"
+        ],
+        "properties": {
+          "id": { "type": "string" },
+          "title": { "type": "string" },
+          "author": { "type": "string" },
+          "description": { "type": "string" },
+          "animal": { "type": "string" },
+          "timeframe": { "type": "string" },
+          "location": { "type": "string" },
+          "category": { "$ref": "#/components/schemas/Category" },
+          "interested": { "type": "integer", "minimum": 0 },
+          "createdAt": { "type": "string", "format": "date-time" }
+        }
+      },
+      "Offer": {
+        "type": "object",
+        "required": ["id", "postId", "author", "text", "createdAt"],
+        "properties": {
+          "id": { "type": "string" },
+          "postId": { "type": "string" },
+          "author": { "type": "string" },
+          "text": { "type": "string" },
+          "createdAt": { "type": "string", "format": "date-time" }
+        }
+      },
+      "CreatePostRequest": {
+        "type": "object",
+        "required": [
+          "title",
+          "author",
+          "description",
+          "animal",
+          "timeframe",
+          "location",
+          "category"
+        ],
+        "properties": {
+          "title": { "type": "string" },
+          "author": { "type": "string" },
+          "description": { "type": "string" },
+          "animal": { "type": "string" },
+          "timeframe": { "type": "string" },
+          "location": { "type": "string" },
+          "category": { "$ref": "#/components/schemas/Category" }
+        }
+      },
+      "CreateOfferRequest": {
+        "type": "object",
+        "required": ["author", "text"],
+        "properties": {
+          "author": { "type": "string" },
+          "text": { "type": "string" }
+        }
+      }
+    }
+  }
+}

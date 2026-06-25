@@ -1,0 +1,43 @@
+### Alle Gesuche
+GET http://localhost:7400/api/posts
+
+### Gesuche nach Interesse sortiert
+GET http://localhost:7400/api/posts?orderBy=interested
+
+### Gesuche gefiltert nach Kategorie
+GET http://localhost:7400/api/posts?category=katze
+
+### Gesuche mit künstlicher Verzögerung (1200ms)
+GET http://localhost:7400/api/posts?slow
+
+### Gesuche mit künstlicher Verzögerung (3000ms)
+GET http://localhost:7400/api/posts?slow=3000
+
+### Einzelnes Gesuch
+GET http://localhost:7400/api/posts/r1
+
+### Einzelnes Gesuch (nicht gefunden)
+GET http://localhost:7400/api/posts/r99
+
+### Interessiert-Zähler erhöhen
+PUT http://localhost:7400/api/posts/r1/interested
+
+### Angebote zu einem Gesuch
+GET http://localhost:7400/api/posts/r1/offers
+
+### Neues Angebot schreiben
+POST http://localhost:7400/api/posts/r1/offers
+Content-Type: application/json
+
+{
+  "author": "max_k",
+  "text": "Kann gerne vorbeikommen und mich kümmern!"
+}
+
+### Ungültiges Angebot (fehlende Felder)
+POST http://localhost:7400/api/posts/r1/offers
+Content-Type: application/json
+
+{
+  "author": ""
+}

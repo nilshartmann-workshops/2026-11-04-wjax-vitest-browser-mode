@@ -1,0 +1,17 @@
+package-lock.json
+pnpm-lock.yaml
+yarn.lock
+
+.output/
+.tanstack/
+
+CLAUDE.md
+src/routeTree.gen.ts
+src/api/generated/
+
+public/fonts/
+temp-google-fonts.css
+
+dist/
+.vitest/
+public/mockServiceWorker.js
