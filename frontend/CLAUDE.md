@@ -71,9 +71,15 @@ Vitest mit zwei Projekten (konfiguriert in `vite.config.ts` unter `test.projects
 `HEADLESS=true pnpm test` — sonst öffnet jeder Lauf ein sichtbares
 Browserfenster (Mechanik: `headless`-Konstante in `vite.config.ts`).
 
-**Nach Änderungen und vor dem Testen `pnpm clean`:** sonst können alte
-Artefakte aus früheren Läufen (Failure-Screenshots, Traces, Vite-Cache)
-das Ergebnis verfälschen oder dich in die Irre führen.
+**Tests nach jeder Änderung:**
+
+1. Nach jeder Änderung `HEADLESS=true pnpm vitest run --since-last-run`. Das führt nur die Tests aus, die von der Änderung betroffen sind.
+2. Nach der Reparatur eines Fehlschlags `HEADLESS=true pnpm vitest run --last-failed`.
+3. Vor dem Abschluss `pnpm check:ts` und `HEADLESS=true pnpm vitest run` für alle Tests.
+
+Eine Aufgabe ist erst fertig, wenn beides grün ist. Schlägt ein Test fehl, wird der Code repariert und nicht der Test. Ist die Änderung am Verhalten gewollt, wird vor dem Anpassen des Tests nachgefragt. Die Meldung eines Browser-Tests endet mit der Tabelle `Trace:` und zeigt den `ARIA tree`, wenn ein Locator nichts findet. Beides zuerst lesen.
+
+**Bei unerklärlichen Ergebnissen `pnpm clean`:** alte Artefakte aus früheren Läufen (Failure-Screenshots, Traces, Vite-Cache) können das Ergebnis verfälschen. `pnpm clean` löscht auch die Aufzeichnung für `--since-last-run`, der nächste Lauf führt deshalb alle Tests aus.
 
 **MSW in Browser-Tests:** Für API-Mocking im Browser-Projekt steht MSW
 bereit. `public/mockServiceWorker.js` ist generiert (`msw init`) und
