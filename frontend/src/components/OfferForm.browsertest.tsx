@@ -5,6 +5,7 @@ import { afterAll, afterEach, beforeAll, expect, test } from "vitest";
 import { userEvent } from "vitest/browser";
 import { render } from "vitest-browser-react";
 
+import type { CreateOfferRequest, Offer } from "#/api/generated";
 import { OfferForm } from "./OfferForm.tsx";
 
 // REIHENFOLGE:
@@ -12,17 +13,24 @@ import { OfferForm } from "./OfferForm.tsx";
 //  BACKEND STOPPEN!!!!
 //  2. spyOn entfernen, Test ausführen -> Netzwerk geht nicht
 //  3. MSW ergänzen -> Netzwerk-Request zeigen
+type OfferParams = { postId: string };
 const worker = setupWorker(
-  http.post("http://localhost:7400/api/posts/:postId/offers", async () => {
-    await delay(); // macht den Pending-Zustand beobachtbar
-    return HttpResponse.json({
-      id: "o-1",
-      postId: "p-1",
-      author: "cat_lover_99",
-      text: "Ich übernehme das gerne!",
-      createdAt: "2026-06-17T10:00:00.000Z",
-    });
-  }),
+  // 🕵️‍♂️ Zeigen: createdAt löschen, tsc meldet den Fehler im Handler
+  // Typargumente: Pfadparameter, Body des Requests, Body der Antwort
+  http.post<OfferParams, CreateOfferRequest, Offer>(
+    "http://localhost:7400/api/posts/:postId/offers",
+    async ({ params, request }) => {
+      const body = await request.json();
+      await delay(); // macht den Pending-Zustand beobachtbar
+      return HttpResponse.json({
+        id: "o-1",
+        postId: params.postId,
+        author: body.author,
+        text: body.text,
+        createdAt: "2026-06-17T10:00:00.000Z",
+      });
+    },
+  ),
 );
 
 beforeAll(() => worker.start());
