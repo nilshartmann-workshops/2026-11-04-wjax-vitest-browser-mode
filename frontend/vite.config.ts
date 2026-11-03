@@ -23,7 +23,8 @@ const headless = process.env.HEADLESS === "true";
 const trace = process.env.CI ? "on" : "off";
 
 // Trace View von Vitest, unabhängig vom Provider
-const traceView = "failure-only";
+// 🕵️‍♂️ Zeigen: pnpm vitest --ui, Test öffnen, Trace ansehen
+const traceView = "on";
 
 const browsers: ("chromium" | "firefox" | "webkit")[] = ["chromium"];
 
