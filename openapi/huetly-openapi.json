@@ -191,12 +191,12 @@
       },
       "Offer": {
         "type": "object",
-        "required": ["id", "postId", "author", "text", "createdAt"],
+        "required": ["id", "postId", "author", "message", "createdAt"],
         "properties": {
           "id": { "type": "string" },
           "postId": { "type": "string" },
           "author": { "type": "string" },
-          "text": { "type": "string" },
+          "message": { "type": "string" },
           "createdAt": { "type": "string", "format": "date-time" }
         }
       },
