@@ -23,7 +23,7 @@ export type Offer = {
     id: string;
     postId: string;
     author: string;
-    message: string;
+    text: string;
     createdAt: string;
 };
 

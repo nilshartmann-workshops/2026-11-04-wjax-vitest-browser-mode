@@ -27,7 +27,7 @@ export const zOffer = z.object({
     id: z.string(),
     postId: z.string(),
     author: z.string(),
-    message: z.string(),
+    text: z.string(),
     createdAt: z.iso.datetime()
 });
 
