@@ -1,23 +1,24 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { expect, test, vi } from "vitest";
+import { afterEach, expect, test, vi } from "vitest";
 import { userEvent } from "vitest/browser";
 import { render } from "vitest-browser-react";
 
-import { createOffer } from "#/api/create-offer.ts";
 import { OfferForm } from "./OfferForm.tsx";
 
-// 🕵️‍♂️ Erzählen: createOffer ist ersetzt, URL, Request und OfferSchema.parse
-//    laufen im Test nie
-vi.mock("#/api/create-offer.ts");
+afterEach(() => vi.restoreAllMocks());
 
 test("sendet das Formular ab und leert das Formular", async () => {
-  vi.mocked(createOffer).mockResolvedValue({
-    id: "o-1",
-    postId: "p-1",
-    author: "cat_lover_99",
-    text: "Ich übernehme das gerne!",
-    createdAt: "2026-06-17T10:00:00.000Z",
-  });
+  // 🕵️‍♂️ Erzählen: die Antwort ist von Hand gebaut und ohne Typ, der Test
+  //    kennt die URL samt Query, und im Network-Tab steht kein Request
+  const fetchSpy = vi.spyOn(globalThis, "fetch").mockResolvedValue(
+    Response.json({
+      id: "o-1",
+      postId: "p-1",
+      author: "cat_lover_99",
+      text: "Ich übernehme das gerne!",
+      createdAt: "2026-06-17T10:00:00.000Z",
+    }),
+  );
 
   const screen = await render(
     <QueryClientProvider client={new QueryClient()}>
@@ -38,10 +39,10 @@ test("sendet das Formular ab und leert das Formular", async () => {
   await expect
     .element(screen.getByLabelText("Dein Benutzername"))
     .toHaveValue("");
-  expect(createOffer).toHaveBeenCalledWith("p-1", {
-    author: "cat_lover_99",
-    text: "Ich übernehme das gerne!",
-  });
+  expect(fetchSpy).toHaveBeenCalledWith(
+    "http://localhost:7400/api/posts/p-1/offers?slow=2400",
+    expect.objectContaining({ method: "POST" }),
+  );
 });
 
 test("zeigt Validierungsfehler und räumt sie beim Ausfüllen wieder ab", async () => {
